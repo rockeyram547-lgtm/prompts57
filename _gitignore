@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+debug_page.html
+.venv/
+data/browser_state.json
+*.state.json
