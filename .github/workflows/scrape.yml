@@ -1,0 +1,85 @@
+name: Scrape Faymas prompts
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "explore = diagnostics only, test = ~20 prompts, full = everything"
+        type: choice
+        options: [full, explore, test]
+        default: full
+  schedule:
+    - cron: "0 3 * * 1"     # every Monday 03:00 UTC: look for newly published prompts
+
+permissions:
+  contents: write           # commit the CSVs
+  actions: write            # let a finished run start the next one
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350    # the script stops itself after 320 min and saves everything
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - run: playwright install --with-deps chromium
+
+      - name: Scrape and build CSVs
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          MODE="${{ inputs.mode }}"
+          if [ "$MODE" = "explore" ]; then
+            python scrape_faymas.py --explore
+          elif [ "$MODE" = "test" ]; then
+            python scrape_faymas.py --render --workers 2 --limit 20 --max-scrolls 5 --force --skip-home
+          else
+            ARGS="--render --workers 4 --delay 1.0 --expected 22000"
+            if [ "${{ github.event_name }}" = "schedule" ]; then ARGS="$ARGS --rediscover"; fi
+            echo "Running: python scrape_faymas.py $ARGS"
+            python scrape_faymas.py $ARGS
+          fi
+
+      - name: Commit results
+        if: always()                      # save progress even if the scrape step failed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data output 2>/dev/null || true
+          if git diff --staged --quiet; then echo "Nothing to commit"; exit 0; fi
+          git commit -m "Update prompts"
+          git pull --rebase
+          git push
+
+      - name: Show completeness check
+        if: always()
+        run: |
+          if [ -f data/completeness.json ]; then cat data/completeness.json; fi
+
+      - name: Start the next run if anything is still missing
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f data/status.json ] && [ "${{ inputs.mode }}" != "explore" ] && [ "${{ inputs.mode }}" != "test" ]; then
+            again=$(python -c "
+          import json
+          s = json.load(open('data/status.json'))
+          print('yes' if ((s['remaining'] > 0 and s['scraped_this_run'] > 0) or (not s['discovery_complete'] and s['new_urls_found'] > 0 and not s['verified_complete'])) and not s.get('blocked') else 'no')
+          ")
+            echo "continue? $again"
+            if [ "$again" = "yes" ]; then
+              gh workflow run scrape.yml
+              echo "Started the next run"
+            fi
+          fi
