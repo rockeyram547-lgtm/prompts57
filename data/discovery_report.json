@@ -1,0 +1,13 @@
+{
+  "per_category": {
+    "photography": 0,
+    "product-brand": 0,
+    "social-media": 0,
+    "wallpapers": 0
+  },
+  "unique_prompts_in_categories": 0,
+  "prompts_in_more_than_one_category": 0,
+  "home_listing_count": 0,
+  "in_home_but_no_category": [],
+  "in_home_but_no_category_total": 0
+}

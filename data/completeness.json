@@ -1,0 +1,16 @@
+{
+  "verified_complete": false,
+  "expected_minimum": 22000,
+  "urls_known": 24944,
+  "urls_scraped": 4,
+  "urls_still_missing": 24940,
+  "urls_gone_404": 0,
+  "stopped_because_blocked": true,
+  "block_events_this_run": 4,
+  "listing_scroll_complete": false,
+  "sitemap_urls": 24944,
+  "sitemap_urls_not_yet_known": 0,
+  "known_urls_not_in_sitemap": 0,
+  "enough_urls_found": true,
+  "updated": "2026-11-02T03:54:01+00:00"
+}
