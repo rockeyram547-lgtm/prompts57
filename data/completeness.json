@@ -1,16 +1,16 @@
 {
   "verified_complete": false,
   "expected_minimum": 22000,
-  "urls_known": 24944,
-  "urls_scraped": 4,
-  "urls_still_missing": 24940,
+  "urls_known": 27971,
+  "urls_scraped": 8,
+  "urls_still_missing": 27963,
   "urls_gone_404": 0,
   "stopped_because_blocked": true,
   "block_events_this_run": 4,
   "listing_scroll_complete": false,
-  "sitemap_urls": 24944,
+  "sitemap_urls": 27967,
   "sitemap_urls_not_yet_known": 0,
-  "known_urls_not_in_sitemap": 0,
+  "known_urls_not_in_sitemap": 4,
   "enough_urls_found": true,
-  "updated": "2026-11-02T03:54:01+00:00"
+  "updated": "2026-11-09T04:39:28+00:00"
 }
